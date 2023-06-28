@@ -1,0 +1,50 @@
+pipeline {
+  agent any
+
+  stages {
+    stage('Build') {
+      steps {
+        script {
+          // Clone your Git repository
+          git 'https://github.com/isramareddy/dockerhub-project/new/main'
+
+          // Build the Docker image
+          docker.build("1iram/nginx:latest")
+        }
+      }
+    }
+
+    stage('Quality Check') {
+      steps {
+        // Run SonarQube analysis
+        withSonarQubeEnv('Sonarqube') {
+          sh 'mvn sonar:sonar'
+        }
+      }
+    }
+
+    stage('Deploy to Nexus') {
+      steps {
+        // Deploy artifacts to Nexus
+        script {
+          nexusArtifactUploader(credentialsId: 'nexusid', groupId: 'your-group-id', version: "latest", repositoryUrl: 'http://3.108.217.159:8081/repository/dokcerhub//',
+            // Add more artifacts if needed
+          )
+        }
+      }
+    }
+
+    stage('Push') {
+      steps {
+        // Push the Docker image to DockerHub
+        script {
+          withCredentials([usernamePassword(credentialsId: 'dockerhubid', usernameVariable: '1iram', passwordVariable: 'Subbureddy@1')]) {
+            docker.withRegistry('https://registry.hub.docker.com', 'dockerhubid') {
+              docker.image(1iram/nginx:latest").push()
+            }
+          }
+        }
+      }
+    }
+  }
+}
