@@ -6,7 +6,7 @@ pipeline {
       steps {
         script {
           // Clone your Git repository
-          git 'https://github.com/isramareddy/dockerhub-project/new/main'
+          git 'https://github.com/isramareddy/dockerhub-project.git'
 
           // Build the Docker image
           docker.build("1iram/nginx:latest")
